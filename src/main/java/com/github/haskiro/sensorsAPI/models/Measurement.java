@@ -1,9 +1,7 @@
 package com.github.haskiro.sensorsAPI.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -17,15 +15,15 @@ public class Measurement {
     @Column(name = "id")
     private int id;
 
-    @NotEmpty(message = "Value must not be empty")
+    @NotNull
     @Min(value = -100, message = "Value must be more than -100")
     @Max(value = 100, message = "Value must be less than 100")
     @Column(name = "value")
-    private double value;
+    private Double value;
 
-    @NotEmpty(message = "Raining must not be empty")
+    @NotNull
     @Column(name = "raining")
-    private boolean raining;
+    private Boolean raining;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -51,19 +49,19 @@ public class Measurement {
         this.id = id;
     }
 
-    public double getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
-    public boolean isRaining() {
+    public Boolean getRaining() {
         return raining;
     }
 
-    public void setRaining(boolean raining) {
+    public void setRaining(Boolean raining) {
         this.raining = raining;
     }
 
@@ -98,11 +96,11 @@ public class Measurement {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Measurement that = (Measurement) o;
-        return getId() == that.getId() && Double.compare(that.getValue(), getValue()) == 0 && isRaining() == that.isRaining() && Objects.equals(getCreatedAt(), that.getCreatedAt());
+        return getId() == that.getId() && Objects.equals(getValue(), that.getValue()) && Objects.equals(getRaining(), that.getRaining()) && Objects.equals(getCreatedAt(), that.getCreatedAt());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getValue(), isRaining(), getCreatedAt());
+        return Objects.hash(getId(), getValue(), getRaining(), getCreatedAt());
     }
 }

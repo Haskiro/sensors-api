@@ -3,8 +3,9 @@ package com.github.haskiro.sensorsAPI.controllers;
 import com.github.haskiro.sensorsAPI.dto.SensorDTO;
 import com.github.haskiro.sensorsAPI.models.Sensor;
 import com.github.haskiro.sensorsAPI.services.SensorsService;
-import com.github.haskiro.sensorsAPI.util.SensorErrorResponse;
+import com.github.haskiro.sensorsAPI.util.ErrorResponse;
 import com.github.haskiro.sensorsAPI.util.SensorNotCreatedException;
+import com.github.haskiro.sensorsAPI.util.SensorNotFoundException;
 import com.github.haskiro.sensorsAPI.util.SensorValidator;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -57,8 +58,8 @@ public class SensorsController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<SensorErrorResponse> handleException(SensorNotCreatedException e) {
-        SensorErrorResponse response = new SensorErrorResponse(
+    private ResponseEntity<ErrorResponse> handleException(SensorNotCreatedException e) {
+        ErrorResponse response = new ErrorResponse(
                 e.getMessage(),
                 LocalDateTime.now()
         );
