@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MeasurementsService {
@@ -33,13 +34,14 @@ public class MeasurementsService {
     @Transactional
     public void saveMeasurement(Measurement measurement) {
         enrichMeasurement(measurement);
-        Sensor sensor = sensorsRepository.findByName(measurement.getSensor().getName()).get();
-        measurement.setSensor(sensor);
 
         measurementsRepository.save(measurement);
     }
 
     private void enrichMeasurement(Measurement measurement) {
+        Optional<Sensor> sensor = sensorsRepository.findByName(measurement.getSensor().getName());
+        sensor.ifPresent(measurement::setSensor);
+
         measurement.setCreatedAt(LocalDateTime.now());
     }
 }

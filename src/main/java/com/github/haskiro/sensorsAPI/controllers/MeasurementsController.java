@@ -6,7 +6,6 @@ import com.github.haskiro.sensorsAPI.services.MeasurementsService;
 import com.github.haskiro.sensorsAPI.util.ErrorResponse;
 import com.github.haskiro.sensorsAPI.util.MeasurementNotCreatedException;
 import com.github.haskiro.sensorsAPI.util.MeasurementValidator;
-import com.github.haskiro.sensorsAPI.util.SensorNotFoundException;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.github.haskiro.sensorsAPI.util.ErrorUtil.returnErrorsAsString;
 
 @Controller
 @RequestMapping("/measurements")
@@ -44,7 +45,7 @@ public class MeasurementsController {
     @GetMapping
     public List<MeasurementDTO> getMeasurements() {
         return measurementsService.getMeasurements().stream()
-                .map(measurement -> modelMapper.map(measurement, MeasurementDTO.class))
+                .map(this::convertToMeasurementDTO)
                 .collect(Collectors.toList());
     }
 
@@ -55,19 +56,12 @@ public class MeasurementsController {
             measurementValidator.validate(measurementDTO, bindingResult);
 
         if (bindingResult.hasErrors()) {
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            StringBuilder errorMessage = new StringBuilder();
+            String errorMessage = returnErrorsAsString(bindingResult);
 
-            errors.forEach(fieldError -> {
-                errorMessage.append(fieldError.getField())
-                        .append(" - ").append(fieldError.getDefaultMessage())
-                        .append(";");
-            });
-
-            throw new MeasurementNotCreatedException(errorMessage.toString());
+            throw new MeasurementNotCreatedException(errorMessage);
         }
 
-        measurementsService.saveMeasurement(modelMapper.map(measurementDTO, Measurement.class));
+        measurementsService.saveMeasurement(convertToMeasurement(measurementDTO));
 
         return ResponseEntity.ok(HttpStatus.OK);
     }
@@ -80,5 +74,13 @@ public class MeasurementsController {
         );
 
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    public MeasurementDTO convertToMeasurementDTO(Measurement measurement) {
+        return modelMapper.map(measurement, MeasurementDTO.class);
+    }
+
+    public Measurement convertToMeasurement(MeasurementDTO measurementDTO) {
+        return modelMapper.map(measurementDTO, Measurement.class);
     }
 }

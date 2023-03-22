@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static com.github.haskiro.sensorsAPI.util.ErrorUtil.returnErrorsAsString;
+
 @Controller
 @RequestMapping("/sensors")
 @RestController
@@ -41,18 +43,11 @@ public class SensorsController {
             sensorValidator.validate(sensorDTO, bindingResult);
 
             if (bindingResult.hasErrors()) {
-                List<FieldError> errors = bindingResult.getFieldErrors();
-                StringBuilder errorMessage = new StringBuilder();
+                String errorMessage = returnErrorsAsString(bindingResult);
 
-                errors.forEach(fieldError -> {
-                    errorMessage.append(fieldError.getField())
-                            .append(" - ").append(fieldError.getDefaultMessage())
-                            .append(";");
-                });
-
-                throw new SensorNotCreatedException(errorMessage.toString());
+                throw new SensorNotCreatedException(errorMessage);
             }
-            sensorsService.saveSensor(modelMapper.map(sensorDTO, Sensor.class));
+            sensorsService.saveSensor(convertToSensor(sensorDTO));
 
             return ResponseEntity.ok(HttpStatus.OK);
     }
@@ -65,5 +60,9 @@ public class SensorsController {
         );
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    public Sensor convertToSensor (SensorDTO sensorDTO) {
+        return modelMapper.map(sensorDTO, Sensor.class);
     }
 }
